@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Our Love Universe</title>
+
+<style>
+
+body{
+margin:0;
+font-family:Arial;
+background:black;
+color:white;
+overflow-x:hidden;
+}
+
+/* STAR SKY */
+
+canvas{
+position:fixed;
+top:0;
+left:0;
+z-index:-1;
+}
+
+/* APP STYLE */
+
+.app{
+max-width:420px;
+margin:auto;
+padding:15px;
+}
+
+.card{
+background:rgba(255,255,255,0.08);
+padding:15px;
+margin:15px 0;
+border-radius:12px;
+backdrop-filter:blur(6px);
+}
+
+button{
+padding:10px 16px;
+border:none;
+border-radius:8px;
+background:#ff4d6d;
+color:white;
+font-size:16px;
+cursor:pointer;
+}
+
+input,textarea{
+width:100%;
+margin:5px 0;
+padding:8px;
+border-radius:6px;
+border:none;
+}
+
+h1{
+text-align:center;
+}
+
+#proposal{
+display:none;
+text-align:center;
+font-size:22px;
+}
+
+#gameCanvas{
+background:#111;
+border-radius:10px;
+}
+
+</style>
+</head>
+
+<body>
+
+<canvas id="stars"></canvas>
+
+<div class="app">
+
+<h1 id="title">Love Universe</h1>
+
+<div class="card">
+<h3>⏳ Love Timer</h3>
+<p id="timer"></p>
+</div>
+
+<div class="card">
+<h3>💞 Love Story Map</h3>
+<div id="story"></div>
+</div>
+
+<div class="card">
+<h3>🎮 Mini Love Game</h3>
+<canvas id="gameCanvas" width="300" height="200"></canvas>
+<p>Score: <span id="score">0</span></p>
+</div>
+
+<div class="card">
+<h3>🧠 Love Message Generator</h3>
+<p id="loveMsg"></p>
+<button onclick="generateLove()">Generate Message</button>
+</div>
+
+<div class="card">
+<button onclick="startProposal()">Start Cinematic Proposal 💍</button>
+<div id="proposal"></div>
+</div>
+
+<div class="card">
+<h3>⚙ Customize</h3>
+
+<label>Your Name</label>
+<input id="yourName">
+
+<label>Partner Name</label>
+<input id="partnerName">
+
+<label>Relationship Date</label>
+<input id="date" type="date">
+
+<label>Love Story Events (comma separated)</label>
+<textarea id="events"></textarea>
+
+<button onclick="saveSettings()">Save</button>
+
+</div>
+
+</div>
+
+<script>
+
+/* STAR SKY */
+
+let canvas=document.getElementById("stars")
+let ctx=canvas.getContext("2d")
+
+canvas.width=window.innerWidth
+canvas.height=window.innerHeight
+
+let stars=[]
+
+for(let i=0;i<150;i++){
+stars.push({
+x:Math.random()*canvas.width,
+y:Math.random()*canvas.height,
+size:Math.random()*2
+})
+}
+
+function drawStars(){
+
+ctx.clearRect(0,0,canvas.width,canvas.height)
+
+ctx.fillStyle="white"
+
+stars.forEach(s=>{
+ctx.beginPath()
+ctx.arc(s.x,s.y,s.size,0,Math.PI*2)
+ctx.fill()
+
+s.y+=0.2
+if(s.y>canvas.height)s.y=0
+})
+
+requestAnimationFrame(drawStars)
+
+}
+
+drawStars()
+
+/* LOVE TIMER */
+
+function updateTimer(){
+
+let date=document.getElementById("date").value
+if(!date)return
+
+let start=new Date(date)
+let now=new Date()
+
+let days=Math.floor((now-start)/(1000*60*60*24))
+
+document.getElementById("timer").innerText=
+days+" days together ❤️"
+
+}
+
+setInterval(updateTimer,1000)
+
+/* LOVE STORY MAP */
+
+function renderStory(){
+
+let events=document.getElementById("events").value.split(",")
+
+let html=""
+
+events.forEach(e=>{
+html+="<p>⭐ "+e+"</p>"
+})
+
+document.getElementById("story").innerHTML=html
+
+}
+
+/* MINI GAME */
+
+let g=document.getElementById("gameCanvas")
+let gctx=g.getContext("2d")
+
+let heartX=150
+let heartY=0
+let score=0
+
+document.addEventListener("mousemove",e=>{
+let rect=g.getBoundingClientRect()
+heartX=e.clientX-rect.left
+})
+
+function game(){
+
+gctx.clearRect(0,0,300,200)
+
+gctx.fillStyle="red"
+gctx.beginPath()
+gctx.arc(heartX,180,10,0,Math.PI*2)
+gctx.fill()
+
+gctx.fillText("❤️",heartX-8,heartY)
+
+heartY+=2
+
+if(heartY>180 && Math.abs(heartX-150)<40){
+
+score++
+document.getElementById("score").innerText=score
+heartY=0
+
+}
+
+if(heartY>200)heartY=0
+
+requestAnimationFrame(game)
+
+}
+
+game()
+
+/* LOVE MESSAGE GENERATOR */
+
+const msgs=[
+"You are the best thing in my universe ❤️",
+"My world started the day I met you ✨",
+"I would choose you in every lifetime 💖",
+"You are my forever person 💍"
+]
+
+function generateLove(){
+
+let m=msgs[Math.floor(Math.random()*msgs.length)]
+
+document.getElementById("loveMsg").innerText=m
+
+}
+
+/* PROPOSAL */
+
+function startProposal(){
+
+let name=document.getElementById("partnerName").value
+
+let p=document.getElementById("proposal")
+
+p.style.display="block"
+
+p.innerHTML="✨ Under this infinite sky...<br><br>"+
+name+", will you be with me forever? 💍<br><br>"+
+"<button onclick='yes()'>YES ❤️</button>"
+
+}
+
+function yes(){
+
+document.getElementById("proposal").innerHTML=
+"🎉 She Said YES! 🎉"
+
+}
+
+/* SAVE SETTINGS */
+
+function saveSettings(){
+
+localStorage.setItem("yourName",
+document.getElementById("yourName").value)
+
+localStorage.setItem("partnerName",
+document.getElementById("partnerName").value)
+
+localStorage.setItem("date",
+document.getElementById("date").value)
+
+localStorage.setItem("events",
+document.getElementById("events").value)
+
+renderStory()
+
+alert("Saved ❤️")
+
+}
+
+/* LOAD */
+
+window.onload=()=>{
+
+document.getElementById("yourName").value=
+localStorage.getItem("yourName")||""
+
+document.getElementById("partnerName").value=
+localStorage.getItem("partnerName")||""
+
+document.getElementById("date").value=
+localStorage.getItem("date")||""
+
+document.getElementById("events").value=
+localStorage.getItem("events")||
+"First meet,First smile,First date"
+
+renderStory()
+
+}
+
+</script>
+
+</body>
+</html>
